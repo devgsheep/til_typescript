@@ -5,6 +5,7 @@
     "module": "esnext",
     "outDir": "./dist",
     "strict": true,
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+    "strictNullChecks": false // 여기서 null값 허용
   }
 }
