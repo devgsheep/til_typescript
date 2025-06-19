@@ -21,9 +21,21 @@ const num_7: number = NaN;
 const str_1 = "안녕";
 const str_2: string = "반가워";
 let str_3: string = "김밥";
+const str_4: string = `백틱`;
 ```
 
 ## 3. boolean 타입
+
+- 프로그래밍에서 false처럼 사용되는 값(falshy한 값)
+- 아래의 경우는 falshy하다고 판단하여 false로 인정
+
+```txt
+""         비어있는 문자열은 if문 등에 사용할 때 false로 판단
+0          숫자 0은 if문 등에 사용할 때 false로 판단
+null       if문 등에 사용할 때 false로 판단
+undefined  if문 등에 사용할 때 false로 판단
+NaN        if문 등에 사용할 때 false로 판단
+```
 
 ```ts
 const bool_1 = false;
@@ -43,6 +55,7 @@ let null_2: null = null;
 ## 5. undefined 타입
 
 - 프로그램이 초기값으로 셋팅함
+- 값이 없다. 즉, 정의가 되어있지 않음.
 
 ```ts
 let user: undefined = undefined;
@@ -303,24 +316,31 @@ let policyCheck: boolean = false;
 ```
 
 - 카멜(Camel Case) 명명법
+
 ```txt
 1. 가장 많이 사용하는 방식으로 소문자로 시작
 2. 새 단어는 대문자
 let userName;
 ```
+
 - 스네이크(Snake Case) 명명법
+
 ```txt
 1. 모두 소문자로 작성하며 단어마다 _ 기호가 붙는다.
 let user_name;
 ```
+
 - 케밥(Kebap Case) 명명법
+
 ```txt
 1. 모두 소문자로 작성
 2. 단어 사이에 - 기호를 붙인다.
 3. 케밥 케이스는 코딩에 사용 못함(주로 css 클래스명으로 활용)
 let user-name;
 ```
+
 - 파스칼(Pascal Case) 명명법
+
 ```txt
 1. 대문자로 시작
 2. 새로운 단어는 대문자로 시작
@@ -333,7 +353,9 @@ let Person;
 let Swiper;
 let UserInfo;
 ```
+
 - 상수(Const Case) 명명법
+
 ```txt
 1. 전체가 대문자
 2. 상수라고 해서 변하지 않는 값이라고 유추함
