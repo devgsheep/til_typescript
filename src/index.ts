@@ -1,8 +1,13 @@
-class MathTool {
-  static PI: number = 3.14;
-  static multi(x: number, y: number) {
-    return x * y;
-  }
+type User = { age: number; nickName: string; isMember: boolean };
+
+const obj: User = {
+  age: 10,
+  nickName: "hong",
+  isMember: true,
+};
+
+for (let key in obj) {
+  console.log(key); // age, nickName, isMember
+  console.log(obj[key as keyof User]); // 10, hong, true
 }
-MathTool.PI;
-MathTool.multi(5, 6);
+

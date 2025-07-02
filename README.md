@@ -78,6 +78,21 @@ for (key in obj) {
 }
 ```
 
+```ts
+type User = { age: number; nickName: string; isMember: boolean };
+
+const obj: User = {
+  age: 10,
+  nickName: "hong",
+  isMember: true,
+};
+
+for (let key in obj) {
+  console.log(key); // age, nickName, isMember
+  console.log(obj[key as keyof User]); // 10, hong, true
+}
+```
+
 - Object.keys(객체).forEach : 참조만 하자.
 
 ```js
