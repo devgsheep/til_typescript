@@ -10,7 +10,7 @@
 - XHR(Xml Http Request)
 - Callback 함수
 - Promise
-- async/await
+- `async/await` : 가장 많이 활용
 
 ## 2. Dummy/Mockup 사이트(백엔드 자료를 회신)
 
@@ -22,42 +22,43 @@
 
 - PostMan 설치 및 활용 필요
 - https://www.postman.com
-- 백엔드 측에 Swagger 구성을 요청하시면 참 좋습니다.
+- 백엔드 측에 `Swagger 구성을 요청`하시면 참 좋습니다. (좋아하지는 않음)
 
 ## 4. XHR (Xml Http Request)
 
-- `Request` 라는 단어를 알고 계셔야 합니다. (자료 요청)
-- `Response` 라는 단어를 알고 계셔야 합니다. (결과 회신)
-- `Query` 라는 단어도 알고 계셔야 합니다. (Request한 문자열)
+- `Request` 라는 단어를 알고 계셔야 합니다. (자료 `요청`)
+- `Response` 라는 단어를 알고 계셔야 합니다. (결과 `회신`)
+- `Query` 라는 단어도 알고 계셔야 합니다. (`질의문`, Request한 문자열)
 
 ### 4.1. 쿼리의 이해
 
 - `https://isearch.interpark.com/result?q=부산&referrer=`
-- 도메인 : https://isearch.interpark.com
-- 라우터 경로 : /result
-- 쿼리(자료요청 문자열)의 시작 : ?
+- 도메인 : `https://isearch.interpark.com`
+- `라우터` 경로 : `/result`
+- 쿼리(자료요청 문자열)의 시작 : `?`
 - 실제쿼리 : `q=부산&referrer=`
 
 ### 4.2. 실제 쿼리 상세 설명
 
-- 실제쿼리 : q=부산&referrer=
-- 변수 q = 부산
+- 실제쿼리 : `q=부산&referrer=`
+- 변수 `q = 부산`
 - `&` 로 구분
 - 변수 referrer = null
 
-### 4.3. 쿼리예제
+### 4.3. 예제 분석
 
 - `https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=0&ie=utf8&query=iu&ackey=fu7sz5z4`
 
 ### 4.4. 쿼리를 전송할 시에는 5가지 방식으로 보낼 수 있다.
 
+- `REST API` 칭함 (주소/라우터)
 - `CRUD` 작업(DB를 Create, Reade, Update, Delete)
 
-- GET : 자료를 주세요. (DB에서 자료 읽고 결과 회신)
-- POST : 자료를 전송합니다. (DB에서 자료 1개 추가)
-- DELETE : 자료를 삭제하세요. (DB에서 자료 1개 삭제)
-- PUT : 하나의 자료내용 전부를 교체하세요. (DB에서 자료 한개 전체 수정)
-- PATCH : 하나의 자료내용 중 한 부분만 수정하세요. (DB에서 자료 한개 중 일부만 수정)
+- `GET` : 자료를 주세요. (DB에서 자료 읽고 결과 회신)
+- `POST` : 자료를 전송합니다. (DB에서 자료 1개 추가)
+- `DELETE` : 자료를 삭제하세요. (DB에서 자료 1개 삭제)
+- `PUT` : 하나의 자료내용 전부를 교체하세요. (DB에서 자료 한개 전체 수정)
+- `PATCH` : 하나의 자료내용 중 한 부분만 수정하세요. (DB에서 자료 한개 중 일부만 수정)
 
 ### 4.5. XHR로 비동기 작업해 보기
 
@@ -156,6 +157,94 @@
 </html>
 ```
 
+- 타입스크립트로 수정해 보기 1번
+
+```js
+// 전체 게시글 요청하는 함수
+function getPosts() {
+  console.log("전체자료 주세요.");
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "https://jsonplaceholder.typicode.com/posts");
+  xhr.send();
+  console.log("자료를 전송하였습니다.");
+  console.log("다음 작업 진행합니다.");
+  xhr.onload = function () {
+    console.log("요청 처리가 된 경우의 결과 : ", xhr);
+    if (xhr.status === 200) {
+      console.log(xhr.responseText);
+    } else if (xhr.status === 404) {
+      console.log("없는 페이지로 접속하셨습니다.");
+    } else if (xhr.status === 505) {
+      console.log("서버가 꺼졌습니다. 잠시 후 다시 시도해주세요.");
+    }
+  };
+}
+// 요청하기
+getPosts();
+```
+
+```ts
+// 전체 게시글 요청하는 함수
+function getPosts(): void {
+  console.log("전체자료 주세요.");
+  const xhr: XMLHttpRequest = new XMLHttpRequest();
+  xhr.open("GET", "https://jsonplaceholder.typicode.com/posts");
+  xhr.send();
+  console.log("자료를 전송하였습니다.");
+  console.log("다음 작업 진행합니다.");
+  xhr.onload = function () {
+    console.log("요청 처리가 된 경우의 결과 : ", xhr);
+    if (xhr.status === 200) {
+      console.log(xhr.responseText);
+    } else if (xhr.status === 404) {
+      console.log("없는 페이지로 접속하셨습니다.");
+    } else if (xhr.status === 505) {
+      console.log("서버가 꺼졌습니다. 잠시 후 다시 시도해주세요.");
+    }
+  };
+}
+// 요청하기
+getPosts();
+```
+
+- 타입스크립트로 수정해 보기 2번
+
+```js
+function getAlbums() {
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "https://jsonplaceholder.typicode.com/albums");
+  xhr.send();
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      console.log(xhr.responseText);
+    } else if (xhr.status === 404) {
+      console.log("주소 및 쿼리 확인하세요.");
+    } else if (xhr.status === 505) {
+      console.log("서버가 전원이 꺼졌습니다. 다시 시도해주세요.");
+    }
+  };
+}
+// getAlbums();
+```
+
+```ts
+function getAlbums(): void {
+  const xhr: XMLHttpRequest = new XMLHttpRequest();
+  xhr.open("GET", "https://jsonplaceholder.typicode.com/albums");
+  xhr.send();
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      console.log(xhr.responseText);
+    } else if (xhr.status === 404) {
+      console.log("주소 및 쿼리 확인하세요.");
+    } else if (xhr.status === 505) {
+      console.log("서버가 전원이 꺼졌습니다. 다시 시도해주세요.");
+    }
+  };
+}
+// getAlbums();
+```
+
 ### 4.6 콜백함수로 개선해 보기
 
 - 코드 개선 시도
@@ -219,6 +308,59 @@
     </script>
   </body>
 </html>
+```
+
+- 타입스크립트로 변경해 보기
+
+```ts
+/**
+ * 지정된 주소로 Http 요청을 보내고 결과를 함수로 처리함.
+ *
+ * @param {string} addr - 요청을 보낼 URL (예: "posts", "albums")
+ * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH" } method - HTTP 메소드 종류
+ * @param {(responseText:string) => void} callback - 요청 성공시 실행할 콜백함수
+ */
+
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+type Callback = (responseText: string) => void;
+
+function getData(addr: string, method: Method, callback: Callback): void {
+  const url: string = `https://jsonplaceholder.typicode.com/${addr}`;
+  const xhr: XMLHttpRequest = new XMLHttpRequest();
+  xhr.open(method, url);
+  xhr.send();
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      // 콜백함수 자리
+      callback(xhr.responseText);
+    } else if (xhr.status === 404) {
+      console.log(`${addr} 의 쿼리가 잘못되었습니다. 확인하세요.`);
+    } else if (xhr.status === 505) {
+      console.log("서버가 오류입니다. 다시 시도해주세요.");
+    }
+  };
+}
+
+function postsParse(_data: string): void {
+  console.log("게시글 결과 ====");
+  console.log(_data);
+}
+function albumsParse(_data: string): void {
+  console.log("앨범 결과 ====");
+  console.log(_data);
+}
+function photosParse(_data: string): void {
+  console.log("사진 결과 ====");
+  console.log(_data);
+}
+function todosParse(_data: string): void {
+  console.log("할일 결과 ====");
+  console.log(_data);
+}
+getData("posts", "GET", postsParse);
+getData("albums", "GET", albumsParse);
+getData("photos", "GET", photosParse);
+getData("todos", "GET", todosParse);
 ```
 
 ### 4.7. HTTP Status의 이해
@@ -328,11 +470,85 @@
 </html>
 ```
 
+- 타입스크립트로 변환하기
+
+```ts
+/**
+ * 지정된 주소로 Http 요청을 보내고 결과를 함수로 처리함.
+ *
+ * @param {string} addr - 요청을 보낼 URL (예: "posts", "albums")
+ * @param {"GET"|"POST"|"PUT"|"DELETE"|"PATCH" } method - HTTP 메소드 종류
+ * @param {(responseText:string) => void} callback - 요청 성공시 실행할 콜백함수
+ */
+
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+function getData(addr: string, method: Method): Promise<string> {
+  // 주소
+  const url: string = `https://jsonplaceholder.typicode.com/${addr}`;
+
+  return new Promise(function (resolve, rejected) {
+    // 하고 싶은 XHR
+    const xhr: XMLHttpRequest = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.send();
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        // 성공함수 자리
+        resolve(xhr.responseText);
+      } else if (xhr.status === 404) {
+        rejected(`${addr} 의 쿼리가 잘못되었습니다. 확인하세요.`);
+      } else if (xhr.status === 505) {
+        rejected("서버가 오류입니다. 다시 시도해주세요.");
+      } else {
+        rejected(`알수 없는 오류입니다. ${xhr.status}`);
+      }
+    };
+  });
+}
+
+function postsParse(_data: string): void {
+  console.log("게시글 결과 ==== ");
+  console.log(_data);
+}
+function albumsParse(_data: string): void {
+  console.log("앨범 결과 ==== ");
+  console.log(_data);
+}
+function photosParse(_data: string): void {
+  console.log("사진 결과 ==== ");
+  console.log(_data);
+}
+function todosParse(_data: string): void {
+  console.log("할일 결과 ==== ");
+  console.log(_data);
+}
+getData("posts", "GET")
+  .then(function (res) {
+    postsParse(res);
+    return getData("albums", "GET");
+  })
+  .then(function (res) {
+    albumsParse(res);
+    return getData("photos", "GET");
+  })
+  .then(function (res) {
+    photosParse(res);
+    return getData("todos", "GET");
+  })
+  .then(function (res) {
+    todosParse(res);
+  })
+  .catch(function (err) {
+    console.log(err);
+  });
+```
+
 ## 6. async/await
 
-- 너무 좋아요.
-- 너무 쉬워요.
-- 단, 규칙은 지키세요.
+- `너무 좋아요.`
+- `너무 쉬워요.`
+- `단, 규칙은 지키세요.`
 
 ### 6.1. 반드시 다음처럼 코딩하셔야 합니다.
 
@@ -370,6 +586,45 @@ async function getAllData() {
 }
 ```
 
+- 타입스크립트로 변환하기 (`async`는 반드시 )
+
+```ts
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+function getData(addr: string, method: Method): Promise<string> {
+  const url: string = `https://jsonplaceholder.typicode.com/${addr}`;
+  return new Promise(function (resolve, rejected) {
+    // 하고 싶은 XHR
+    const xhr: XMLHttpRequest = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.send();
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        // 성공함수 자리
+        resolve(xhr.responseText);
+      } else if (xhr.status === 404) {
+        rejected(`${addr} 의 쿼리가 잘못되었습니다. 확인하세요.`);
+      } else if (xhr.status === 505) {
+        rejected("서버가 오류입니다. 다시 시도해주세요.");
+      } else {
+        rejected(`알수 없는 오류입니다. ${xhr.status}`);
+      }
+    };
+  });
+}
+// 타입스크립트로 변경
+async function getAllData(): Promise<void> {
+  try {
+    const posts: string = await getData("posts", "GET");
+    const albums: string = await getData("albums", "GET");
+    const photos: string = await getData("photos", "GET");
+    const todos: string = await getData("todos", "GET");
+  } catch (error) {
+    console.log(error);
+  }
+}
+```
+
 ### 6.2. XHR 대신에 fetch 추천
 
 ```js
@@ -383,6 +638,39 @@ async function getData(addr, method) {
     }
   } catch (error) {
     console.log(error);
+  }
+}
+```
+
+- 타입스크립트로 변경해 보기
+
+```ts
+type Method = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+async function getData<T>(
+  addr: string,
+  method: Method
+): Promise<T | undefined> {
+  const url: string = `https://jsonplaceholder.typicode.com/${addr}`;
+  try {
+    const response: Response = await fetch(url, { method });
+    if (response.ok) {
+      const result: T = await response.json();
+      return result;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+// 전체 POSTS 글 가져오기
+type PostType = { userId: number; id: number; title: string; body: string };
+type AlbumType = { userId: number; id: number; title: string };
+async function getPosts() {
+  try {
+    const res = await getData<PostType[]>("posts", "GET");
+    const res2 = await getData<AlbumType[]>("albums", "GET");
+  } catch (error) {
+    console.log(`${error}가 발생하였습니다.`);
   }
 }
 ```
