@@ -228,8 +228,6 @@ let result_2: string[] = reverseArr(["a", "b", "c"]);
 let result_3: (string | number)[] = reverseArr([3, "b", "c"]);
 ```
 
-- 예제 4
-
 ```ts
 function mergeArr<T>(arr1: T[], arr2: T[]): T[] {
   return [...arr1, ...arr2];
@@ -242,4 +240,242 @@ function mergeArr<T, U>(arr1: T[], arr2: U[]): (T | U)[] {
   return [...arr1, ...arr2];
 }
 let result: (string | number)[] = mergeArr([1, 2, 3], ["a", "b", "c"]);
+```
+
+- 함수의 데이터 종류의 변경 진행과정
+
+```ts
+// 배열의 특정 요소를 인덱스를 가져오기
+// 배열은 length 라는 속성이 있다. (길이, 요소 개수)
+// 배열은 요소의 순서(index)가 있습니다.
+
+function getItemIndex(
+  배열: (number | string | boolean)[],
+  인덱스: number
+): number | string | boolean {
+  return 배열[인덱스];
+}
+// 규칙 반드시 숫자 배열이여야 한다. (배열종류 제한이 걸림)
+const result = getItemIndex([4, 7, 9], 2);
+const result2 = getItemIndex(["안녕", "hi", "hello"], 2);
+const result3 = getItemIndex([true, false, true, true], 2);
+```
+
+- any로 해결했다. (데이터 체크를 포기한 상태)
+- 혹시 지금은 에러가 없는데 나중에 에러가 발생하지 않을까?
+
+```ts
+// 배열의 특정 요소를 인덱스를 가져오기
+// 배열은 length 라는 속성이 있다. (길이, 요소 개수)
+// 배열은 요소의 순서(index)가 있습니다.
+
+function getItemIndex(배열: any[], 인덱스: number): any {
+  return 배열[인덱스];
+}
+// 규칙 반드시 숫자 배열이여야 한다. (배열종류 제한이 걸림)
+const result: any = getItemIndex([4, 7, 9], 2);
+const result2: any = getItemIndex(["안녕", "hi", "hello"], 2);
+const result3: any = getItemIndex([true, false, true, true], 2);
+```
+
+- `제네릭을 사용`하면 코딩 중에 오류발견이 쉽고, 서비스 중에도 대응이 수월함.
+
+```ts
+// 배열의 특정 요소를 인덱스를 가져오기
+// 배열은 length 라는 속성이 있다. (길이, 요소 개수)
+// 배열은 요소의 순서(index)가 있습니다.
+
+function getItemIndex<T>(배열: T[], 인덱스: number): T {
+  return 배열[인덱스];
+}
+// 규칙 반드시 숫자 배열이여야 한다. (배열종류 제한이 걸림)
+const result: number = getItemIndex([4, 7, 9], 2);
+const result2: string = getItemIndex(["안녕", "hi", "hello"], 2);
+const result3: boolean = getItemIndex([true, false, true, true], 2);
+const result4: string | number | boolean = getItemIndex(
+  [true, 1, "hi", null],
+  2
+);
+```
+
+- 기본적으로 진행한 함수
+
+```ts
+// 배열의 요소 중 값이 있는지 파악가능
+function findeItem(배열: (string | number)[], 값: string | number): boolean {
+  return 배열.includes(값);
+}
+const result = findeItem(["수영", "공부", "요리"], "운동");
+const result2 = findeItem([12, 20, 33], 20);
+```
+
+- any로 해결
+
+```ts
+// 배열의 요소 중 값이 있는지 파악가능
+function findeItem(배열: any[], 값: any): boolean {
+  return 배열.includes(값);
+}
+const result = findeItem(["수영", "공부", "요리"], "운동");
+const result2 = findeItem([12, 20, 33], 20);
+```
+
+- Generic으로 해결해 봄
+
+```ts
+// 배열의 요소 중 값이 있는지 파악가능
+function findeItem<T>(배열: T[], 값: T): boolean {
+  return 배열.includes(값);
+}
+const result: boolean = findeItem(["수영", "공부", "요리"], "운동");
+const result2: boolean = findeItem([12, 20, 33], 20);
+const result3: boolean = findeItem([12, "hello", false], 20);
+```
+
+## 인터페이스에서 제네릭 살펴보기
+
+- 인터페이스는 데이터 모양이 `객체`이다.
+- 인터페이스는 객체 만을 위한 문법이다.
+- 인터페이스 설계과정
+
+```ts
+// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
+
+interface ApiResponse {
+  success: boolean;
+  data: string | string[];
+}
+const loginApi: ApiResponse = {
+  success: true,
+  data: "ok",
+};
+
+const todoApi: ApiResponse = {
+  success: true,
+  data: ["공부", "운동", "휴식"],
+};
+```
+
+- 앞으로 또 바뀔 소지가 있음을 앎
+- any 해결해 봄
+
+```ts
+// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
+
+interface ApiResponse {
+  success: any;
+  data: any | any[];
+}
+const loginApi: ApiResponse = {
+  success: true,
+  data: "ok",
+};
+
+const todoApi: ApiResponse = {
+  success: false,
+  data: ["공부", "운동", "휴식"],
+};
+```
+
+- Generic으로 해결해 봄(코딩중 오류, 실행중 오류 파악 용이)
+
+```ts
+// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T | T[];
+}
+const loginApi: ApiResponse<string> = {
+  success: true,
+  data: "ok",
+};
+
+const todoApi: ApiResponse<string> = {
+  success: false,
+  data: ["공부", "운동", "휴식"],
+};
+```
+
+- 인터페이스에서 `여러 개의 제네릭` 활용하기
+
+```ts
+// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
+interface ApiResponse<T, U, V> {
+  success: T;
+  data: U | V[];
+}
+const loginApi: ApiResponse<boolean, string, string> = {
+  success: true,
+  data: "ok",
+};
+
+const todoApi: ApiResponse<number, string, string> = {
+  success: 0,
+  data: ["공부", "운동", "휴식"],
+};
+```
+
+## 클래스에서 제네릭 살펴보기
+
+- 일반적인 클래스 구성
+
+```ts
+// 저장하기 관련 클래스
+class TodoStorage {
+  // 내부에서만 사용할 변수
+  private items: string[] = [];
+  // 메소드 만으로 즉, 검증된 과정으로만 내부 item 배열 접근
+  add(item: string): void {
+    this.items.push(item);
+  }
+  read(): string {
+    return this.items;
+  }
+}
+
+const result = new TodoStorage();
+// result 에는 인스턴스로서 {}가 저장됨
+// result.items = ["아이유", "지민"]; // 접근불가
+// console.log(result.items);
+result.add("아이유");
+result.read();
+```
+
+- 다양한 데이터 종류를 위해서 any 변경
+
+```ts
+// 저장하기 관련 클래스
+class TodoStorage {
+  private items: any[] = [];
+  add(item: any): void {
+    this.items.push(item);
+  }
+  read(): any[] {
+    return this.items;
+  }
+}
+
+const result = new TodoStorage();
+result.add("아이유");
+result.read();
+```
+
+- 제네릭으로 활용
+
+```typescript
+// 저장하기 관련 클래스
+class TodoStorage<T> {
+  private items: T[] = [];
+  add(item: T): void {
+    this.items.push(item);
+  }
+  read(): T[] {
+    return this.items;
+  }
+}
+
+const result = new TodoStorage();
+result.add("아이유");
+result.read();
 ```
