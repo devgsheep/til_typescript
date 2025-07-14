@@ -1,481 +1,241 @@
-# Generic
+# Utility
 
-- `타입을 나중에 결정한다.`
-- 제네릭을 `타입 변수`라고 정리하자.
-- 일반적인 변수는 값이 바뀌지만
-- 제네릭은 값이 아니고 `변수의 종류를 변경`한다
+- 이미 만들어둔 `type을 더 쉽게 사용`하는 도구
+- 기존 유명 ts 라이브러리 분석 및 활용에 도움이 됨.
+- 경험이 쌓이면 자주 활용하는 문법
 
-## 1. 문제 상황 살펴보기
+## 1. Partial<T>
 
-- 매개변수의 `종류만 다르고` 기능은 같더라
-- 아래 코드를 자주 보게 되더라.
+- 모든 속성을 ?로변환함(Optional) : 선택적 속성
 
 ```ts
-function showNumber(a: number): void {
-  console.log(a);
+interface Student {
+  name: string;
+  age: number;
 }
-showNumber(100);
-
-function showString(a: string): void {
-  console.log(a);
-}
-showString("안녕");
+// 반드시 속성이 있어야 함
+const iu: Student = {
+  name: "아이유",
+  age: 28,
+};
+// Partial을 이용해서 선택적 속성을 만들기
+/*
+ * 변환됨. {name?:string, age?:number}
+ */
+const jimin: Partial<Student> = {
+  name: "지민",
+};
 ```
 
-- 매개변수의 종류는 `any` 로 하면 되겠네?
-- 두 함수를 하나로 정리하는 것이 좋겠다.
+## 2. Requied<T>
+
+- 모든 속성을 필수로 바꿔주는 문법
 
 ```ts
-function showArg(a: any): void {
-  console.log(a);
+interface UserConfig {
+  darkMode?: boolean;
+  fontSize?: number;
 }
-showArg(0);
-showArg("안녕");
+// 위의 타입을 필수 요소로 변경하고자 함.
+const iu: UserConfig = {
+  darkMode: true,
+};
+// 위의 타입을 필수 요소로 변경하고자 함.
+/* Required를 사용하여 필수요소로 변경시킴
+ * {darkMode:string, fontSize:number}
+ */
+const jimin: Required<UserConfig> = {
+  darkMode: true,
+  fontSize: 20,
+};
 ```
 
-- 위 처럼 any 작업을 했더니 추가적인 기능이 필요하게 되었다.
-- `any`는 서비스 실행 중 오류 발생함
-- 즉 코딩 중 오류 확인 어려움. 예측 불가
+### 3. Readonly<T>
+
+- 모든 속성을 초기 값 설정 후 변경못하게 하는 문법
 
 ```ts
-function showArgA(a: any): void {
-  console.log(a);
-  console.log(a.length);
+interface UserConfig {
+  readonly darkMode: boolean;
+  fontSize: number;
 }
-showArgA(0); // 실행중에 오류 발생
-showArgA("안녕"); // 정상작동
+const iu: UserConfig = {
+  darkMode: true,
+  fontSize: 20,
+};
+iu.fontSize = 11; // 변경가능
+/*
+ * Readonly는 초기설정 후 변경 불가
+ * {readonly darkMode:boolean,
+ * readonly fontSize:number
+ * }
+ */
+const jimin: Readonly<UserConfig> = {
+  darkMode: true,
+  fontSize: 20,
+};
+jimin.fontSize = 40; // Error. 읽기 전용, 변경 불가능
 ```
 
-## 2. 문제 상황을 Generic으로 해결해 보기
+## 4. Pick(T)
+
+- 필요로 한 속성만 별도로 뽑아주는 문법
 
 ```ts
-// T를 무엇으로 생각하시면 좋으냐면 타입변수
-function showArgGeneric<T>(a: T): void {
-  console.log(a);
+interface GameItem {
+  id: number;
+  name: string;
+  point: number;
 }
-showArgGeneric(0);
-showArgGeneric("안녕");
+const itemSword: GameItem = {
+  id: 101,
+  name: "좋은 검",
+  point: 1000,
+};
+/*
+ * Pick을 이용한 기존 속성 뽑기
+ * {id:numbr, name:string}
+ */
+type showItem = Pick<GameItem, "id" | "name">;
+const myItem: showItem = {
+  id: 100,
+  name: "좋은 방패",
+};
 ```
 
-- 아래의 코드는 아직도 오류로 처리됩니다.
-- 하지만, 실행중 오류가 아니고, 코딩 중 오류를 표현합니다.
+## 5. Omit<T>
+
+- 특정 속성만 제거하는 문법.
 
 ```ts
-// T를 무엇으로 생각하시면 좋으냐면 타입변수
-function showArgGeneric<T>(a: T): void {
-  console.log(a);
-  // 아래의 문제는 타입 좁히기로 해결이 가능하다.
-  // 타입 가드 라고 합니다.
-  console.log(a.length);
+interface GameItem {
+  id: number;
+  name: string;
+  point: number;
 }
-showArgGeneric(0);
-showArgGeneric("안녕");
+const itemSword: GameItem = {
+  id: 101,
+  name: "좋은 검",
+  point: 1000,
+};
+/*
+ * Omit 을 이용한 속성 제거하기
+ * {id:number, name:string}
+ */
+type ShowItem = Omit<GameItem, "point">;
+const myItem: ShowItem = {
+  id: 100,
+  name: "좋은 방패",
+};
 ```
 
-- 우선 해결코드를 진행하고, 다시 문법 보자.
+## 6. Record<K, T>
+
+- 키-값 쌍으로 된 객체 생성 문법
 
 ```ts
-function showArgGeneric<T>(a: T): void {
-  console.log(a);
-  // console.log(a.length) // 아래에서 if 로 오류처리 진행
-
-  // 타입 좁히기
-  if ((a as any).length !== undefined) {
-    console.log((a as any).length);
-  } else {
-    console.log("length 속성이 없습니다.");
+type Subject = "math" | "english" | "science";
+/*
+ * Record 는 속성명과 속성값을 새롭게 만들어줌
+ * {
+    math: number;
+    english: number;
+    science: number;
   }
-}
-showArgGeneric(0);
-showArgGeneric("안녕");
-```
-
-## 3. 다양한 예제
-
-```ts
-// 배열의 요소를 출력하는 함수
-// 그런데 배열의 요소의 타입을 제네릭으로 구현
-
-function showItems(
-  arr: (
-    | string
-    | number
-    | boolean
-    | { age: number }
-    | { age: number; name: string }
-  )[]
-) {
-  arr.forEach((item, index) => {
-    console.log(`${index} 번째 요소는 ${item} 입니다.`);
-  });
-}
-showItems(["a", "b", "c"]);
-showItems([1, 2, 3, 4]);
-showItems([true, true, false, true]);
-showItems([{ age: 1 }, { age: 2 }, { age: 3 }]);
-showItems([
-  { age: 1, name: "hong" },
-  { age: 2, name: "kim" },
-  { age: 3, name: "park" },
-]);
-```
-
-- 제네릭을 활용한 코드
-
-```ts
-// 배열의 요소를 출력하는 함수
-// 그런데 배열의 요소의 타입을 제네릭으로 구현
-
-function showItems<T>(arr: T[]) {
-  arr.forEach((item, index) => {
-    console.log(`${index} 번째 요소는 ${item} 입니다.`);
-  });
-}
-showItems(["a", "b", "c"]);
-showItems([1, 2, 3, 4]);
-showItems([true, true, false, true]);
-showItems([{ age: 1 }, { age: 2 }, { age: 3 }]);
-showItems([
-  { age: 1, name: "hong" },
-  { age: 2, name: "kim" },
-  { age: 3, name: "park" },
-]);
-```
-
-- 예제 2
-
-```ts
-// 복사를 하는 함수
-function copyValue(a: number | string | boolean | (number | string)[]) {
-  return a;
-}
-const result_1 = copyValue(1);
-const result_2 = copyValue("hello");
-const result_3 = copyValue(false);
-const result_4 = copyValue([1, 2, 3]);
-const result_5 = copyValue(["a", "b", "c"]);
-```
-
-```ts
-// 복사를 하는 함수
-function copyValue(a: any) {
-  return a;
-}
-const result_1 = copyValue(1);
-const result_2 = copyValue("hello");
-const result_3 = copyValue(false);
-const result_4 = copyValue([1, 2, 3]);
-const result_5 = copyValue(["a", "b", "c"]);
-```
-
-- 제네릭 활용 코드
-
-```ts
-// 복사를 하는 함수
-function copyValue<T>(a: T) {
-  return a;
-}
-const result_1 = copyValue(1);
-const result_2 = copyValue("hello");
-const result_3 = copyValue(false);
-const result_4 = copyValue([1, 2, 3]);
-const result_5 = copyValue(["a", "b", "c"]);
-```
-
-- 예제 3
-
-```ts
-// 입력값 반환하기
-function returnSame(input: any) {
-  return input;
-}
-const esult_1: any = returnSame(1);
-const esult_2: any = returnSame("안녕");
-const esult_3: any = returnSame([1, 2, 3]);
-```
-
-- 제네릭 활용 코드
-
-```ts
-// 입력값 반환하기
-function returnSame<T>(input: T): T {
-  return input;
-}
-const esult_1: 1 = returnSame(1);
-const esult_2: "안녕" = returnSame("안녕");
-const esult_3: number[] = returnSame([1, 2, 3]);
-```
-
-## 함수에서 활용되는 제네릭 살펴보기
-
-```ts
-function getFirst<T>(arr: T[]): T {
-  return arr[0];
-}
-
-let result_1: number = getFirst([1, 2, 3]);
-let result_2: string = getFirst(["a", "b", "c"]);
-let result_3: string | number = getFirst([3, "b", "c"]);
-```
-
-```ts
-function reverseArr<T>(arr: T[]): T[] {
-  return [...arr].reverse();
-}
-
-let result_1: number[] = reverseArr([1, 2, 3]);
-let result_2: string[] = reverseArr(["a", "b", "c"]);
-let result_3: (string | number)[] = reverseArr([3, "b", "c"]);
-```
-
-```ts
-function mergeArr<T>(arr1: T[], arr2: T[]): T[] {
-  return [...arr1, ...arr2];
-}
-let result: number[] = mergeArr([1, 2, 3], [6, 7, 3]);
-```
-
-```ts
-function mergeArr<T, U>(arr1: T[], arr2: U[]): (T | U)[] {
-  return [...arr1, ...arr2];
-}
-let result: (string | number)[] = mergeArr([1, 2, 3], ["a", "b", "c"]);
-```
-
-- 함수의 데이터 종류의 변경 진행과정
-
-```ts
-// 배열의 특정 요소를 인덱스를 가져오기
-// 배열은 length 라는 속성이 있다. (길이, 요소 개수)
-// 배열은 요소의 순서(index)가 있습니다.
-
-function getItemIndex(
-  배열: (number | string | boolean)[],
-  인덱스: number
-): number | string | boolean {
-  return 배열[인덱스];
-}
-// 규칙 반드시 숫자 배열이여야 한다. (배열종류 제한이 걸림)
-const result = getItemIndex([4, 7, 9], 2);
-const result2 = getItemIndex(["안녕", "hi", "hello"], 2);
-const result3 = getItemIndex([true, false, true, true], 2);
-```
-
-- any로 해결했다. (데이터 체크를 포기한 상태)
-- 혹시 지금은 에러가 없는데 나중에 에러가 발생하지 않을까?
-
-```ts
-// 배열의 특정 요소를 인덱스를 가져오기
-// 배열은 length 라는 속성이 있다. (길이, 요소 개수)
-// 배열은 요소의 순서(index)가 있습니다.
-
-function getItemIndex(배열: any[], 인덱스: number): any {
-  return 배열[인덱스];
-}
-// 규칙 반드시 숫자 배열이여야 한다. (배열종류 제한이 걸림)
-const result: any = getItemIndex([4, 7, 9], 2);
-const result2: any = getItemIndex(["안녕", "hi", "hello"], 2);
-const result3: any = getItemIndex([true, false, true, true], 2);
-```
-
-- `제네릭을 사용`하면 코딩 중에 오류발견이 쉽고, 서비스 중에도 대응이 수월함.
-
-```ts
-// 배열의 특정 요소를 인덱스를 가져오기
-// 배열은 length 라는 속성이 있다. (길이, 요소 개수)
-// 배열은 요소의 순서(index)가 있습니다.
-
-function getItemIndex<T>(배열: T[], 인덱스: number): T {
-  return 배열[인덱스];
-}
-// 규칙 반드시 숫자 배열이여야 한다. (배열종류 제한이 걸림)
-const result: number = getItemIndex([4, 7, 9], 2);
-const result2: string = getItemIndex(["안녕", "hi", "hello"], 2);
-const result3: boolean = getItemIndex([true, false, true, true], 2);
-const result4: string | number | boolean = getItemIndex(
-  [true, 1, "hi", null],
-  2
-);
-```
-
-- 기본적으로 진행한 함수
-
-```ts
-// 배열의 요소 중 값이 있는지 파악가능
-function findeItem(배열: (string | number)[], 값: string | number): boolean {
-  return 배열.includes(값);
-}
-const result = findeItem(["수영", "공부", "요리"], "운동");
-const result2 = findeItem([12, 20, 33], 20);
-```
-
-- any로 해결
-
-```ts
-// 배열의 요소 중 값이 있는지 파악가능
-function findeItem(배열: any[], 값: any): boolean {
-  return 배열.includes(값);
-}
-const result = findeItem(["수영", "공부", "요리"], "운동");
-const result2 = findeItem([12, 20, 33], 20);
-```
-
-- Generic으로 해결해 봄
-
-```ts
-// 배열의 요소 중 값이 있는지 파악가능
-function findeItem<T>(배열: T[], 값: T): boolean {
-  return 배열.includes(값);
-}
-const result: boolean = findeItem(["수영", "공부", "요리"], "운동");
-const result2: boolean = findeItem([12, 20, 33], 20);
-const result3: boolean = findeItem([12, "hello", false], 20);
-```
-
-## 인터페이스에서 제네릭 살펴보기
-
-- 인터페이스는 데이터 모양이 `객체`이다.
-- 인터페이스는 객체 만을 위한 문법이다.
-- 인터페이스 설계과정
-
-```ts
-// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
-
-interface ApiResponse {
-  success: boolean;
-  data: string | string[];
-}
-const loginApi: ApiResponse = {
-  success: true,
-  data: "ok",
-};
-
-const todoApi: ApiResponse = {
-  success: true,
-  data: ["공부", "운동", "휴식"],
+*/
+type Score = Record<Subject, number>;
+const iu: Score = {
+  math: 80,
+  english: 74,
+  science: 89,
 };
 ```
 
-- 앞으로 또 바뀔 소지가 있음을 앎
-- any 해결해 봄
+## 7. Exclude<T, U>
+
+- T에서 U를 `제거`한 타입생성 문법
 
 ```ts
-// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
-
-interface ApiResponse {
-  success: any;
-  data: any | any[];
-}
-const loginApi: ApiResponse = {
-  success: true,
-  data: "ok",
-};
-
-const todoApi: ApiResponse = {
-  success: false,
-  data: ["공부", "운동", "휴식"],
-};
+type Subject = "math" | "english" | "science";
+/*
+ * Exclude는 원본에서 속성을 제거한다.
+ * "english" | "science"
+ */
+type Score = Exclude<Subject, "math">;
+const iu: Score = "english";
 ```
-
-- Generic으로 해결해 봄(코딩중 오류, 실행중 오류 파악 용이)
-
-```ts
-// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
-
-interface ApiResponse<T> {
-  success: boolean;
-  data: T | T[];
-}
-const loginApi: ApiResponse<string> = {
-  success: true,
-  data: "ok",
-};
-
-const todoApi: ApiResponse<string> = {
-  success: false,
-  data: ["공부", "운동", "휴식"],
-};
-```
-
-- 인터페이스에서 `여러 개의 제네릭` 활용하기
-
-```ts
-// 백엔드와 비동기 통신을 하는 중의 과정을 위한 객체 설계
-interface ApiResponse<T, U, V> {
-  success: T;
-  data: U | V[];
-}
-const loginApi: ApiResponse<boolean, string, string> = {
-  success: true,
-  data: "ok",
-};
-
-const todoApi: ApiResponse<number, string, string> = {
-  success: 0,
-  data: ["공부", "운동", "휴식"],
-};
-```
-
-## 클래스에서 제네릭 살펴보기
-
-- 일반적인 클래스 구성
-
-```ts
-// 저장하기 관련 클래스
-class TodoStorage {
-  // 내부에서만 사용할 변수
-  private items: string[] = [];
-  // 메소드 만으로 즉, 검증된 과정으로만 내부 item 배열 접근
-  add(item: string): void {
-    this.items.push(item);
-  }
-  read(): string {
-    return this.items;
-  }
-}
-
-const result = new TodoStorage();
-// result 에는 인스턴스로서 {}가 저장됨
-// result.items = ["아이유", "지민"]; // 접근불가
-// console.log(result.items);
-result.add("아이유");
-result.read();
-```
-
-- 다양한 데이터 종류를 위해서 any 변경
-
-```ts
-// 저장하기 관련 클래스
-class TodoStorage {
-  private items: any[] = [];
-  add(item: any): void {
-    this.items.push(item);
-  }
-  read(): any[] {
-    return this.items;
-  }
-}
-
-const result = new TodoStorage();
-result.add("아이유");
-result.read();
-```
-
-- 제네릭으로 활용
 
 ```typescript
-// 저장하기 관련 클래스
-class TodoStorage<T> {
-  private items: T[] = [];
-  add(item: T): void {
-    this.items.push(item);
-  }
-  read(): T[] {
-    return this.items;
-  }
-}
-
-const result = new TodoStorage();
-result.add("아이유");
-result.read();
+type Person = "name" | "age" | "city";
+type Daegu = "city";
+/*
+ * Exclude에 의해서 속성이 제거됨
+ * "name" | "age"
+ */
+type Human = Exclude<Person, Daegu>;
 ```
+
+## 8. Extract<T, U>
+
+- T에서 U만 남기는 문법
+
+```ts
+type Person = "name" | "age" | "city";
+type Daegu = "city";
+/*
+ * Extract에 의해서 속성이 남게됨
+ * "city"
+ */
+type Human = Extract<Person, Daegu>;
+```
+
+## 9. ReturnType
+
+- 함수의 리턴종류 타입 추출
+
+```ts
+function getScore() {
+  return { total: 100, grade: "A" };
+}
+/**
+ * ReturnType 은 함수의 리턴 데이터 종류 추출
+ * {
+total: number;
+grade: string;
+}
+*/
+
+type ScoreType = ReturnType<typeof getScore>;
+```
+
+## 10. Parameters
+
+- 함수의 매개변수 타입을 튜플로 추출
+- 튜플 : `[number, string]`
+
+```typescript
+function getScore(subject: string, score: number) {
+  console.log(`${subject}의 점수는 ${score} 입니다.`);
+}
+/**
+ * Parameters는 함수의 매개변수 데이터 종류 추출
+ * [subject: string, score: number]
+ */
+
+type ScoreType = Parameters<typeof getScore>;
+```
+
+## 11. 종합 응용 예제
+
+- 리액트 타입스크립트 버전
+- 회원가입 폼 작성
+- /src/SignUpForm.tsx 생성
+
+### 11.1. 파일 확장자의 이해
+
+- js : js 내용 작성
+- jsx : js + html 내용 리턴
+- ts : ts 내용 작성(js 생성)
+- tsx : ts + html 내용 리턴 (jsx 생성)
+
+### 11.2. 추후 React TS 버전에서 활용예정
