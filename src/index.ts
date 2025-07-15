@@ -1,8 +1,11 @@
-function getScore(subject: string, score: number) {
-  console.log(`${subject}의 점수는 ${score} 입니다.`);
-}
-/**
- * Parameters는 함수의 매개변수 데이터 종류 추출
- * [subject: string, score: number]
- */
-type ScoreType = Parameters<typeof getScore>;
+type IdolType = {
+  name: string;
+  age: string;
+  year: number;
+};
+
+let bts: IdolType = {
+  name: "BTS",
+  age: "20대",
+  year: 2020,
+};
